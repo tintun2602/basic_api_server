@@ -1,9 +1,9 @@
-use crate::models::*;
 use crate::auth::*;
+use crate::models::*;
 use crate::state::AppState;
 use std::sync::Arc;
 
-use axum::{extract::State, http::HeaderMap, Json}; 
+use axum::{Json, extract::State, http::HeaderMap};
 
 pub async fn login(
     State(state): State<Arc<AppState>>,
@@ -21,9 +21,6 @@ pub async fn login(
         message: ("Login successful").to_string(),
     }))
 }
-
-
-
 
 pub async fn protected_route(
     State(state): State<Arc<AppState>>,

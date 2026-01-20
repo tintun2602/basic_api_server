@@ -10,18 +10,16 @@
 // - Storage: Client stores the JWT (usually in localStorage or an HttpOnly cookie).
 // - Authorization: Client sends the JWT in the Authorization: Bearer <token> header for protected routes.
 
-mod auth; 
-mod handlers; 
-mod models; 
-mod state; 
+mod auth;
+mod handlers;
+mod middleware;
+mod models;
+mod state;
 
-
-use axum::{ Router,routing::get, routing::post};
-use std::sync::Arc;
-use state::AppState; 
+use axum::{Router, routing::get, routing::post};
 use handlers::*;
-
-
+use state::AppState;
+use std::sync::Arc;
 
 #[tokio::main]
 async fn main() {
@@ -43,8 +41,6 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
 
     println!("Server running on http://{address}");
-    
+
     axum::serve(listener, app).await.unwrap();
 }
-
-
