@@ -1,0 +1,54 @@
+use crate::models::*;
+use crate::auth::*;
+use crate::state::AppState;
+use std::sync::Arc;
+
+use axum::{extract::State, http::HeaderMap, Json}; 
+
+pub async fn login(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<LoginRequest>,
+) -> Result<Json<LoginResponse>, AuthError> {
+    // Check credentials (hardcoded for now)
+    if payload.username != "admin" || payload.password != "password123" {
+        return Err(AuthError::InvalidCredentials);
+    }
+
+    let token = create_token(payload.username.clone(), &state.jwt_secret)?;
+
+    Ok(Json(LoginResponse {
+        token,
+        message: ("Login successful").to_string(),
+    }))
+}
+
+
+
+
+pub async fn protected_route(
+    State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
+) -> Result<Json<serde_json::Value>, AuthError> {
+    // Extract and verify token
+
+    let token = extract_token(&headers)?;
+    let claims = verify_token(&token, &state.jwt_secret)?;
+
+    // If we get here, token is valid!
+    Ok(Json(serde_json::json!({
+        "message": "Access granted to protected resources",
+        "username": claims.sub
+    })))
+}
+
+pub async fn logout() -> Json<serde_json::Value> {
+    Json(serde_json::json!({
+        "message": "Logout successful - discard your token on the client side"
+    }))
+}
+
+pub async fn health_check() -> Json<serde_json::Value> {
+    Json(serde_json::json!({
+        "status": "healthy"
+    }))
+}
