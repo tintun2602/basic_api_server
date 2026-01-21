@@ -49,3 +49,22 @@ pub async fn health_check() -> Json<serde_json::Value> {
         "status": "healthy"
     }))
 }
+
+pub async fn user_profile(claims:Claims) -> Json<serde_json::Value> {
+    Json(serde_json::json!({
+        "user": claims.sub, 
+        "message": "Here is your profile", 
+        "account_created": "2026.01.01"
+    }))
+}
+
+pub async fn dashboard(claims:Claims) -> Json<serde_json::Value> {
+    Json(serde_json::json!({
+        "user": claims.sub, 
+        "message": "Welcome to your dashboard", 
+        "stats": {
+            "login_count": 42, 
+            "last_login": "2025.12.12"
+        }
+    }))
+}

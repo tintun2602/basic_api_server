@@ -69,11 +69,12 @@ pub fn extract_token(headers: &HeaderMap) -> Result<String, AuthError> {
 }
 
 #[async_trait]
-impl<S> FromRequestParts<S> for Claims
+impl<S> FromRequestParts<S> for Claims // "I'm implementing the FromRequestParts trait for my Claims type"
+// FromRequestParts is a trait that says 'this type can be extracted from an HTTP request'
 where
-    S: Send + Sync,
+    S: Send + Sync,  // Send: 'Can be safely transferred between threads' Sync: 'Can be safely shared between threads' 
 {
-    type Rejection = AuthError;
+    type Rejection = AuthError; // If extraction fails, return AuthError
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         parts

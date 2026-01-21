@@ -16,7 +16,11 @@ mod middleware;
 mod models;
 mod state;
 
-use axum::{Router, routing::get, routing::post};
+use axum::{
+    Router, 
+    routing::{get, post},
+    middleware::from_fn_with_state
+};
 use handlers::*;
 use state::AppState;
 use std::sync::Arc;
@@ -30,12 +34,23 @@ async fn main() {
         jwt_secret: jwt_secret.to_string(),
     });
 
-    let app = Router::new()
+
+    let public_routes = Router::new()
         .route("/health", get(health_check))
         .route("/login", post(login))
+        .route("/logout", post(logout));
+
+
+    let protected_routes = Router::new()
         .route("/protected", get(protected_route))
-        .route("/logout", post(logout))
-        .with_state(state); // Attach state to router
+        .route("/profile", get(user_profile))
+        .route("/dashboard", get(dashboard))
+        .layer(from_fn_with_state(state.clone(), middleware::auth_middleware));
+
+    let app = Router::new()
+    .merge(public_routes)
+    .merge(protected_routes)
+    .with_state(state); 
 
     let address = "127.0.0.1:3000";
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
